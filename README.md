@@ -46,14 +46,11 @@ The executable can be run as shown:
 </p>
 
 ```bash
-# Run the simulation with default settings (single threaded, run for 10000 steps)
+# Run the simulation with default settings (uses all available processors, run for 10000 steps)
 $ ./hte
 
 # Run the simulation specifying number of threads and steps
-$ ./hte --num-threads 4 --steps 2000
-
-# Run the simulation multiple times, output a graph of computational time against number of threads
-$ ./hte --investigate
+$ ./hte --num-threads 2 --steps 3000
 ```
 
 <p>
@@ -61,6 +58,6 @@ Once completed, the output is written to a gnuplot script and can be viewed with
 </p>
 
 ```bash
-# Run script in gnuplot
+# Run script in gnuplot to view the heatmap
 $ gnuplot heatmap.gnu
 ```
