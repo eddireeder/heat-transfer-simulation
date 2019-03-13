@@ -23,19 +23,21 @@ int output_heatmap(int square_array_length, float temperature_map[square_array_l
     }
     fprintf(fp, "\n");
   }
-  fprintf(fp, "EOD\nplot '$map2' using 2:1:3 with image");
+  fprintf(fp, "EOD\n");
+  fprintf(fp, "plot '$map2' using 2:1:3 with image\n");
+  fprintf(fp, "pause -1 'Hit any key to continue'");
   fclose(fp);
 
   return 1;
 }
 
 
-// Simulate the heat transfer equation
-int simulate_hte(const int steps) {
+// Simulate the heat transfer equation and return the time taken to complete if using OpenMP
+float simulate_hte(const int steps) {
 
   // Start timer
   #ifdef _OPENMP
-    double tstart = omp_get_wtime();
+    float tstart = omp_get_wtime();
   #endif
   
   // Initial conditions
@@ -114,12 +116,18 @@ int simulate_hte(const int steps) {
 
   // End timer
   #ifdef _OPENMP
-    printf("Time taken to complete: %f\n", (omp_get_wtime() - tstart));    
+    float time_to_complete = omp_get_wtime() - tstart;
+    printf("Time taken to complete: %f\n", time_to_complete);    
   #endif
 
   // Write a gnuplot file
   output_heatmap(num_intervals, temperature_map);
-  return 1;
+
+  #ifdef _OPENMP
+    return time_to_complete;
+  #else
+    return 0.0;
+  #endif
 }
 
 
@@ -144,7 +152,25 @@ int main(int argc, char *argv[]) {
 
     if (investigate) {
       // Run simulation multiple times and produce graph
+      #ifdef _OPENMP
+        printf("Starting investigation\n");
+        printf("There are %d processors available\n", omp_get_num_procs());
+        const int max_threads = omp_get_num_procs();
+        float results[max_threads];
+        for (int i = 0; i < max_threads; i++) {
+          printf("Setting number of threads to %d\n", (i + 1));
+          // Set number of threads to use
+          omp_set_num_threads(i + 1);
+          results[i] = simulate_hte(steps);
+        }
+        for (int i = 0; i < max_threads; i++) {
+          printf("%f\n", results[i]);
+        }
+      #else
+        printf("Not using OpenMP, can't investigate parallel performance\n");
+      #endif
 
+      return 1;
     }
 
     // Ensure program compiles and runs with or without OpenMP
