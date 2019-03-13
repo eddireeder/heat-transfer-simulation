@@ -17,7 +17,7 @@ It is written in C, and parallelised using OpenMP to support multiple processors
 For use with OpenMP on Mac OS X, install GCC 8 with:
 </p>
 
-```
+```bash
 $ brew install gcc@8
 ```
 
@@ -29,13 +29,13 @@ At the project root, build the executable with:
 
 #### Linux
 
-```
+```bash
 $ gcc -o hte -fopenmp hte.c
 ```
 
 #### Mac OS X
 
-```
+```bash
 $ gcc-8 -o hte -fopenmp hte.c
 ```
 
@@ -45,7 +45,7 @@ $ gcc-8 -o hte -fopenmp hte.c
 The executable can be run as shown:
 </p>
 
-```
+```bash
 # Run the simulation with default settings (single threaded, run for 10000 steps)
 $ ./hte
 
@@ -60,7 +60,7 @@ $ ./hte --investigate
 Once completed, the output is written to a gnuplot script and can be viewed with:
 </p>
 
-```
+```bash
 # Run script in gnuplot
 $ gnuplot heatmap.gnu
 ```
