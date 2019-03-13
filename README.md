@@ -51,9 +51,6 @@ $ ./hte
 
 # Run the simulation specifying number of threads and steps
 $ ./hte --num-threads 2 --steps 3000
-
-# Run the simulation multiple times, output a graph of computational time against number of threads
-$ ./hte --investigate
 ```
 
 <p>
@@ -61,6 +58,6 @@ Once completed, the output is written to a gnuplot script and can be viewed with
 </p>
 
 ```bash
-# Run script in gnuplot
+# Run script in gnuplot to view the heatmap
 $ gnuplot heatmap.gnu
 ```
