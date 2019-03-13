@@ -70,7 +70,6 @@ float simulate_hte(const int steps) {
 
   // Compute time steps
   for (int i = 0; i < steps; i++) {
-    printf("Computing step %d\n", i);
     // Create new 2D array to store updated values without affecting later calculations (stay in the same time step)
     float new_temperature_map[num_intervals][num_intervals];
     #pragma omp parallel for default(none) shared(temperature_map, new_temperature_map)
