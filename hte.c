@@ -129,45 +129,6 @@ float simulate_hte(const int steps) {
 }
 
 
-// Function to take computational times as input and output a graph of performance
-void output_performance_graph(float *results, int results_length) {
-  
-  FILE *fp;
-  fp = fopen("investigation.gnu", "w");
-  fprintf(fp, "set xlabel 'number of threads'\n");
-  fprintf(fp, "set ylabel 'computation time (s)'\n");
-  fprintf(fp, "set yrange [0:*]\n");
-  fprintf(fp, "$line << EOD\n");
-  // Loop through the results and write them out
-  for (int i = 0; i < results_length; i++) {
-    fprintf(fp, "%d %f\n", (i + 1), results[i]);
-  }
-  fprintf(fp, "EOD\n");
-  fprintf(fp, "plot '$line' with linespoints\n");
-  fprintf(fp, "pause -1 'Hit any key to continue'\n");
-  fclose(fp);
-}
-
-
-// Function to start investigation, runs multiple simulations with increasing number of threads
-void run_investigation(int steps) {
-
-  #ifdef _OPENMP
-    printf("Starting investigation\n");
-    int num_procs = omp_get_num_procs();
-    float results[num_procs];
-    for (int i = 0; i < num_procs; i++) {
-      printf("Setting number of threads to %d\n", (i + 1));
-      omp_set_num_threads(i + 1);
-      results[i] = simulate_hte(steps);
-    }
-    output_performance_graph(results, num_procs);
-  #else
-    printf("Not using OpenMP, can't investigate parallel performance\n");
-  #endif
-}
-
-
 // Main function
 int main(int argc, char *argv[]) {
 
@@ -176,8 +137,6 @@ int main(int argc, char *argv[]) {
     int num_threads;
     #ifdef _OPENMP
       num_threads = omp_get_num_procs();
-    #else
-      num_threads = 1;
     #endif
     bool investigate = false;
 
@@ -187,14 +146,7 @@ int main(int argc, char *argv[]) {
         steps = atoi(argv[i + 1]);
       } else if (strcmp(argv[i], "--num-threads") == 0) {
         num_threads = atoi(argv[i + 1]);
-      } else if (strcmp(argv[i], "--investigate") == 0) {
-        investigate = true;
       }
-    }
-
-    if (investigate) {
-      run_investigation(steps);
-      return 1;
     }
 
     // Ensure program compiles and runs with or without OpenMP
