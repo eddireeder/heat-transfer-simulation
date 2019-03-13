@@ -61,6 +61,6 @@ Once completed, the output is written to a gnuplot script and can be viewed with
 </p>
 
 ```
-$ gnuplot
-gnuplot> load "heatmap.gnu"
+# Run script in gnuplot
+$ gnuplot heatmap.gnu
 ```
