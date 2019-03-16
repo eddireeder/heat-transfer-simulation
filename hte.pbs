@@ -1,0 +1,24 @@
+#!/bin/bash
+# Number of nodes and processors per node requested: 
+#PBS -l nodes=1:ppn=1
+# Time requested (in hh:mm:ss format):
+#PBS -l walltime=00:01:00
+# Name of stdout file:
+#PBS -o hte.out
+# Name of stderr file:
+#PBS -e hte.err
+# Queue name (do not change this):
+#PBS -q training
+# Account code (do not change this):
+#PBS -A Research_Project-IscaTraining
+
+# Change into the directory the job was submitted from
+cd ${PBS_O_WORKDIR}
+
+# Load the GCC module to make sure we pick up the correct run time libraries
+module load GCC
+
+# Run the "hte" executable in this directory
+./hte
+
+# End of file 
