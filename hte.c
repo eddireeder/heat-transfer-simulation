@@ -116,13 +116,12 @@ double simulate_hte(const int steps) {
   printf("Done\n");
 
   // End timer
-  double tend;
+  double time_to_complete;
   #ifdef _OPENMP
-    tend = omp_get_wtime();
+    time_to_complete = omp_get_wtime() - tstart;
   #else
-    tend = clock();
+    time_to_complete = (clock() - tstart)/CLOCKS_PER_SEC;
   #endif
-  double time_to_complete = tend - tstart;
 
   // Write a gnuplot file
   output_heatmap(num_intervals, temperature_map);

@@ -19,6 +19,6 @@ cd ${PBS_O_WORKDIR}
 module load GCC
 
 # Run the "hte" executable in this directory
-./hte
+./hte --write-to-file
 
 # End of file 
