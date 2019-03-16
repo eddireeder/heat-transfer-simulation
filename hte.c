@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 #include <omp.h>
 
 
@@ -31,11 +32,14 @@ void output_heatmap(int square_array_length, float temperature_map[square_array_
 
 
 // Simulate the heat transfer equation and return the time taken to complete if using OpenMP
-float simulate_hte(const int steps) {
+double simulate_hte(const int steps) {
 
   // Start timer
+  double tstart;
   #ifdef _OPENMP
-    float tstart = omp_get_wtime();
+    tstart = omp_get_wtime();
+  #else 
+    tstart = clock();
   #endif
   
   // Initial conditions
@@ -112,19 +116,18 @@ float simulate_hte(const int steps) {
   printf("Done\n");
 
   // End timer
+  double tend;
   #ifdef _OPENMP
-    float time_to_complete = omp_get_wtime() - tstart;
-    printf("Time taken to complete: %f\n", time_to_complete);    
+    tend = omp_get_wtime();
+  #else
+    tend = clock();
   #endif
+  double time_to_complete = tend - tstart;
 
   // Write a gnuplot file
   output_heatmap(num_intervals, temperature_map);
 
-  #ifdef _OPENMP
-    return time_to_complete;
-  #else
-    return 0.0;
-  #endif
+  return time_to_complete;
 }
 
 
@@ -137,7 +140,7 @@ int main(int argc, char *argv[]) {
     #ifdef _OPENMP
       num_threads = omp_get_num_procs();
     #endif
-    bool investigate = false;
+    bool write_to_file = false;
 
     // Loop through arguments and check for flags
     for (int i = 1; i < argc; i++) {
@@ -145,6 +148,8 @@ int main(int argc, char *argv[]) {
         steps = atoi(argv[i + 1]);
       } else if (strcmp(argv[i], "--num-threads") == 0) {
         num_threads = atoi(argv[i + 1]);
+      } else if (strcmp(argv[i], "--write-to-file") == 0) {
+        write_to_file = true;
       }
     }
 
@@ -159,6 +164,34 @@ int main(int argc, char *argv[]) {
     #endif
 
     // Run
-    simulate_hte(steps);
+    printf("Running simulation\n");
+    double time_to_complete = simulate_hte(steps);
+
+    // Write results if specified
+    if (write_to_file) {
+      FILE *fp;
+      fp = fopen("computational_times.dat", "a");
+      #ifdef _OPENMP
+        fprintf(
+          fp,
+          "OpenMP: True\n"
+          "Number of processors: %d\n"
+          "Number of threads: %d\n"
+          "Number of steps: %d\n"
+          "Computational time: %f\n\n",
+          omp_get_num_procs(), num_threads, steps, time_to_complete
+        );
+      #else
+        fprintf(
+          fp,
+          "OpenMP: False\n"
+          "Number of steps: %d\n"
+          "Computational time: %f\n\n",
+          steps, time_to_complete
+        );
+      #endif
+      fclose(fp);
+    }
+
     return 1;
 }
