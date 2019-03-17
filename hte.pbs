@@ -1,6 +1,6 @@
 #!/bin/bash
 # Number of nodes and processors per node requested: 
-#PBS -l nodes=1:ppn=1
+#PBS -l nodes=1:ppn=64
 # Time requested (in hh:mm:ss format):
 #PBS -l walltime=00:01:00
 # Name of stdout file:

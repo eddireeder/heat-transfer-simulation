@@ -113,8 +113,6 @@ double simulate_hte(const int steps) {
     memcpy(temperature_map, new_temperature_map, sizeof temperature_map);
   }
 
-  printf("Done\n");
-
   // End timer
   double time_to_complete;
   #ifdef _OPENMP
@@ -127,6 +125,53 @@ double simulate_hte(const int steps) {
   output_heatmap(num_intervals, temperature_map);
 
   return time_to_complete;
+}
+
+
+// Function to write the performance data
+void write_performance_data(const int num_threads, const int steps, const double time_to_complete) {
+
+  FILE *fp;
+  fp = fopen("computational_times.dat", "a");
+  #ifdef _OPENMP
+    fprintf(
+      fp,
+      "OpenMP: True\n"
+      "Number of processors: %d\n"
+      "Number of threads: %d\n"
+      "Number of steps: %d\n"
+      "Computational time: %f\n\n",
+      omp_get_num_procs(), num_threads, steps, time_to_complete
+    );
+  #else
+    fprintf(
+      fp,
+      "OpenMP: False\n"
+      "Number of steps: %d\n"
+      "Computational time: %f\n\n",
+      steps, time_to_complete
+    );
+  #endif
+  fclose(fp);
+}
+
+
+// Function to investigate the computational times while changing the number of threads
+void investigate_threading(const int steps) {
+
+  const int thread_nums[] = {1, 2, 3, 4};
+  const int sample_size = 4;
+
+  for (int i = 0; i < sample_size; i++) {
+    // Run simulation with current number of threads
+    const int num_threads = thread_nums[i];
+    omp_set_num_threads(num_threads);
+
+    printf("Running simulation with %d threads\n", num_threads);
+    double time_to_complete = simulate_hte(steps);
+    write_performance_data(num_threads, steps, time_to_complete);
+  }
+  printf("Done\n");
 }
 
 
@@ -149,6 +194,13 @@ int main(int argc, char *argv[]) {
         num_threads = atoi(argv[i + 1]);
       } else if (strcmp(argv[i], "--write-to-file") == 0) {
         write_to_file = true;
+      } else if (strcmp(argv[i], "--investigate-threading") == 0) {
+        #ifdef _OPENMP
+          investigate_threading(steps);
+        #else
+          printf("Not using OpenMP\n");
+        #endif
+        return 1;
       }
     }
 
@@ -156,6 +208,7 @@ int main(int argc, char *argv[]) {
     #ifdef _OPENMP
       printf("Using OpenMP\n");
       printf("There are %d processors available\n", omp_get_num_procs());
+      printf("There are a maximum of %d threads available\n", omp_get_max_threads());
       printf("Setting number of threads to %d\n", num_threads);
       omp_set_num_threads(num_threads);
     #else
@@ -165,31 +218,11 @@ int main(int argc, char *argv[]) {
     // Run
     printf("Running simulation\n");
     double time_to_complete = simulate_hte(steps);
+    printf("Done\n");
 
     // Write results if specified
     if (write_to_file) {
-      FILE *fp;
-      fp = fopen("computational_times.dat", "a");
-      #ifdef _OPENMP
-        fprintf(
-          fp,
-          "OpenMP: True\n"
-          "Number of processors: %d\n"
-          "Number of threads: %d\n"
-          "Number of steps: %d\n"
-          "Computational time: %f\n\n",
-          omp_get_num_procs(), num_threads, steps, time_to_complete
-        );
-      #else
-        fprintf(
-          fp,
-          "OpenMP: False\n"
-          "Number of steps: %d\n"
-          "Computational time: %f\n\n",
-          steps, time_to_complete
-        );
-      #endif
-      fclose(fp);
+      write_performance_data(num_threads, steps, time_to_complete);
     }
 
     return 1;
