@@ -76,7 +76,7 @@ double simulate_hte(const int steps) {
   for (int i = 0; i < steps; i++) {
     // Create new 2D array to store updated values without affecting later calculations (stay in the same time step)
     float new_temperature_map[num_intervals][num_intervals];
-    #pragma omp parallel for default(none) shared(temperature_map, new_temperature_map)
+    #pragma omp parallel for default(none) schedule(dynamic) shared(temperature_map, new_temperature_map)
       for (int i = 0; i < num_intervals; i++) {
         for (int j = 0; j < num_intervals; j++) {
           // Assign surrounding temps, checking whether on edge of map (set temp so that no change comes from outside the map)
@@ -191,12 +191,16 @@ int main(int argc, char *argv[]) {
     // Loop through arguments and check for flags
     for (int i = 1; i < argc; i++) {
       if (strcmp(argv[i], "--steps") == 0) {
+        // If specified set the number of steps to compute
         steps = atoi(argv[i + 1]);
       } else if (strcmp(argv[i], "--num-threads") == 0) {
+        // If specified set the number of threads to use
         num_threads = atoi(argv[i + 1]);
       } else if (strcmp(argv[i], "--write-to-file") == 0) {
+        // If specified write the results to file
         write_to_file = true;
       } else if (strcmp(argv[i], "--investigate-threading") == 0) {
+        // If specified, start investigating threading options
         #ifdef _OPENMP
           investigate_threading(steps);
         #else
