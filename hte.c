@@ -159,17 +159,22 @@ void write_performance_data(const int num_threads, const int steps, const double
 // Function to investigate the computational times while changing the number of threads
 void investigate_threading(const int steps) {
 
-  const int thread_nums[] = {1, 2, 3, 4};
-  const int sample_size = 4;
+  const int thread_nums[] = {1, 2, 4, 8, 16};
+  const int sample_size = 5;
+  const int repeat_n_times = 3;
 
   for (int i = 0; i < sample_size; i++) {
     // Run simulation with current number of threads
     const int num_threads = thread_nums[i];
-    omp_set_num_threads(num_threads);
+    #ifdef _OPENMP
+      omp_set_num_threads(num_threads);
+    #endif
 
-    printf("Running simulation with %d threads\n", num_threads);
-    double time_to_complete = simulate_hte(steps);
-    write_performance_data(num_threads, steps, time_to_complete);
+    printf("Running simulation with %d threads %d times\n", num_threads, repeat_n_times);
+    for (int i = 0; i < repeat_n_times; i++) {
+      double time_to_complete = simulate_hte(steps);
+      write_performance_data(num_threads, steps, time_to_complete);
+    }
   }
   printf("Done\n");
 }
