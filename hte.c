@@ -57,6 +57,7 @@ double simulate_hte(const int steps) {
   const int hot_region_array_length = num_intervals*(hot_region_square_length/domain_square_length);
   const int hot_region_lower_bound = (num_intervals/2) - (hot_region_array_length/2);
   const int hot_region_upper_bound = (num_intervals/2) + (hot_region_array_length/2);
+
   #pragma omp parallel for default(none) shared(temperature_map)
     for (int i = 0; i < num_intervals; i++) {
       for (int j = 0; j < num_intervals; j++) {
@@ -76,7 +77,8 @@ double simulate_hte(const int steps) {
   for (int i = 0; i < steps; i++) {
     // Create new 2D array to store updated values without affecting later calculations (stay in the same time step)
     float new_temperature_map[num_intervals][num_intervals];
-    #pragma omp parallel for default(none) schedule(dynamic) shared(temperature_map, new_temperature_map)
+
+    #pragma omp parallel for default(none) shared(temperature_map, new_temperature_map)
       for (int i = 0; i < num_intervals; i++) {
         for (int j = 0; j < num_intervals; j++) {
           // Assign surrounding temps, checking whether on edge of map (set temp so that no change comes from outside the map)
@@ -109,8 +111,15 @@ double simulate_hte(const int steps) {
           new_temperature_map[i][j] = temperature_map[i][j] + rate_of_change_of_temp*time_step;
         }
       }
-    // Copy new temperature map as current
-    memcpy(temperature_map, new_temperature_map, sizeof temperature_map);
+
+    // Assign temperature map values to new values
+    //memcpy(temperature_map, new_temperature_map, sizeof temperature_map);
+    #pragma omp parallel for default(none) shared(temperature_map, new_temperature_map)
+      for (int i = 0; i < num_intervals; i++) {
+        for (int j = 0; j < num_intervals; j++) {
+          temperature_map[i][j] = new_temperature_map[i][j];
+        }
+      }
   }
 
   // End timer
