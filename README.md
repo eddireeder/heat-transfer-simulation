@@ -49,8 +49,11 @@ The executable can be run as shown:
 # Run the simulation with default settings (uses all available processors, run for 10000 steps)
 $ ./hte
 
-# Run the simulation specifying number of threads and steps
-$ ./hte --num-threads 2 --steps 3000
+# Run the simulation specifying number of threads and steps (and write the output to file)
+$ ./hte --num-threads 2 --steps 3000 --write-to-file
+
+# Run the simulation multiple times while varying the number of threads (and write output to file)
+$ ./hte --investigate-threading
 ```
 
 <p>
